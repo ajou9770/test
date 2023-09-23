@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+    <style>
+        body {
+            margin: 10px;
+            font-family: Arial, sans-serif;
+        }
+        div {
+            margin: 10px;
+            padding: 10px;
+        }
+        
+        #weather {
+            margin-top: 15px;
+        }        
+    </style>
+<body>
+    <h2>🌦날씨 정보</h2>
+    <select class="form-control" aria-label="Default select example" id="city" onclick="getWeather()">
+        <option value="도시(지역)를 선택하세요" selected>도시(지역)를 선택하세요</option>
+        <option value="Seoul">Seoul</option>
+        <option value="Busan">Busan</option>
+        <option value="Incheon">Incheon</option>
+        <option value="Suwon">Suwon</option>
+        <option value="Taegu">Taegu</option>
+        <!-- Add more cities as needed -->
+    </select>
+    <!-- <button class="btn btn-primary" type="submit" onclick="getWeather()">날씨정보조회</button>
+     -->
+    <button class="btn btn-info" type="submit" onclick="geoWeather()">현재위치 날씨정보</button>
+    <div id="weather" style="background-color: rgb(217,229,100); color:rgb(30,19,139);"></div>
+    <div id="geocurrent" style="background-color: bisque;"></div>
+    <div class="form-group">
+        <label for="exampleInputEmail1">Email address</label>
+        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <br>
+    <input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
+    <input class="form-control" type="text" placeholder=".form-control">
+    <input class="form-control form-control-sm" type="text" placeholder=".form-control-sm">
+    <div class="mb-3">
+        <label for="formFileMultiple" class="form-label">Multiple files input example</label>
+        <input class="form-control" type="file" id="formFileMultiple" multiple>
+      </div>
+
+      <label for="exampleColorInput" class="form-label">Color picker</label>
+<input type="color" class="form-control form-control-color" id="exampleColorInput" value="#563d7c" title="Choose your color">
+    <script>
+        function getWeather() {
+            var apiKey = '5cb4f4a8cabfb7ea5c72264e6a5fd43d';
+            var city = document.getElementById('city').value;
+            var url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
+        
+            fetch(url)
+    .then(response => response.json())
+    .then(data => {
+        var tempInKelvin = data.main.temp;
+        var tempInCelsius = tempInKelvin - 273.15;
+        var weather = data.weather[0].description;
+        document.getElementById('weather').innerHTML = `현재 ${city}의 날씨: ${weather}, 온도: ${tempInCelsius.toFixed(2)}℃`;
+    })
+            .catch(err => {
+                console.error(err);
+            });
+        }
+        
+    </script>
+    <script>
+        function geoWeather() {
+            console.log("done");
+            var apiKey = '5cb4f4a8cabfb7ea5c72264e6a5fd43d';
+        
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    var lat = position.coords.latitude;
+                    var lon = position.coords.longitude;
+                    var url = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+                console.log(lat);
+                    fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        var tempInKelvin = data.main.temp;
+                        var tempInCelsius = tempInKelvin - 273.15;
+                        var weather = data.weather[0].description;
+                        var city = data.name;
+                        document.getElementById('geocurrent').innerHTML = `현재 ${city}의 날씨: ${weather}이고, 온도: ${tempInCelsius.toFixed(2)}℃`;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+                });
+            } else {
+                alert("Geolocation을 지원하지 않는 브라우저입니다.");
+            }
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

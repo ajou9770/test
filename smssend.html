@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form>
+        <label>이름</label>
+        <input type="text" name="name">
+        <button type="submit" onclick="onFormSubmit()">제출하기</button>
+    </form>
+    <script>
+    function onFormSubmit( ) {
+        alert("done");
+        var to = +821071186639; // 예를 들어, 제출된 form의 첫 번째 항목이 전화번호라고 가정합니다.
+        var body = "Form이 제출되었습니다.";
+      
+        sendSms(to, body);
+      }
+      
+      function sendSms(to, body) {
+        var url = "https://api.twilio.com/2010-04-01/Accounts/" + AC4a52213cd60cb10e1cdda71d6b75048d + "/Messages.json";
+      
+        var options = {
+          method: "POST",
+          headers: {
+            Authorization: "Basic " + Utilities.base64Encode(AC4a52213cd60cb10e1cdda71d6b75048d + ":" + df797d26c977cce23049eaed4146103e)
+          },
+          payload: {
+            From: +821071186639, // Twilio에서 ...
+            To: to, // 수신자 전화번호
+            Body: body // 메시지 본문
+          }
+        };
+      
+        UrlFetchApp.fetch(url, options);
+      }
+    </script>
+</body>
+</html>

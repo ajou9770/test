@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<input list="members" name="member" id="member">
+<datalist id="members">
+</datalist>
+
+<button onclick="saveData()">저장하기</button>
+
+<script>
+// 특정 텍스트 데이터
+var textData = ['장안신협', '의왕신협', '북수원신협', '용인신협', '경기도건축사신협', '경기치과신협'];
+
+// 텍스트 데이터를 localStorage에 저장
+function saveData() {
+    localStorage.setItem('textData', JSON.stringify(textData));
+    loadData();
+}
+
+// localStorage에서 텍스트 데이터를 불러와서 자동완성 목록에 추가
+function loadData() {
+    var data = JSON.parse(localStorage.getItem('textData'));
+    var dataList = document.getElementById('members');
+    dataList.innerHTML = '';
+    for(var i=0; i<data.length; i++) {
+        var option = document.createElement('option');
+        option.value = data[i];
+        dataList.appendChild(option);
+    }
+}
+
+// 페이지 로딩 시 자동완성 목록을 업데이트
+window.onload = loadData;
+</script>
+
+</body>
+</html>

@@ -24,7 +24,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text" id="employeeIdLabel">🔢사번</span>
           </div>
-          <input type="text" class="form-control" id="employeeId" name="employeeId" aria-label="사번" aria-describedby="employeeIdLabel" required>
+          <input type="number" class="form-control" id="employeeId" name="employeeId" aria-label="사번" aria-describedby="employeeIdLabel" required>
         </div>
       </div>
     
@@ -68,7 +68,7 @@
       // 확인 메시지 구성
       var confirmMessage = "다음 내용으로 제출하시겠습니까?\n\n" +
                            "사번: " + employeeId + "\n" +
-                           "이름: " + name + "\n" +
+                           "성명: " + name + "\n" +
                            "연락처: " + contact;
       
       // confirm 창을 통해 제출 여부 확인

@@ -55,11 +55,25 @@
       </div>
       
       <!-- 서명 입력 그룹 -->
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label for="signaturePad">✍서명</label>
         <canvas id="signaturePad"></canvas>
         <button type="button" id="clearSignature" class="btn btn-secondary btn-sm mt-2">서명 지우기</button>
+      </div> -->
+      <div class="form-group" style="position: relative; display: inline-block;">
+        <label for="signaturePad">✍서명</label>
+        <!-- 캔버스: 원하는 스타일로 조정 -->
+        <canvas id="signaturePad" style="border: 1px solid #000; display: block;"></canvas>
+        <!-- 우측 상단에 위치한 이모티콘 버튼 -->
+        <button 
+          type="button" 
+          id="clearSignature" 
+          style="position: absolute; top: 35px; right: -2px; background: transparent; border: none; font-size: 1.5em; cursor: pointer;"
+          title="서명 지우기">
+          🔄
+        </button>
       </div>
+      
       <div id="result" class="mt-3"></div>
       <!-- 제출 버튼 -->
       <button type="submit" class="btn btn-primary btn-block">📤제출하기</button>

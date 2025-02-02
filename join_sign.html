@@ -154,7 +154,7 @@ document.getElementById("attendeeForm").addEventListener("submit", function(e) {
     document.getElementById("attendeeForm").reset();
     signaturePad.clear();  // 서명 캔버스도 초기화
     document.getElementById("submitBtn").style.display="none";
-    // 2초 후에 result 영역 숨기기
+    // 3초 후에 result 영역 숨기기
     setTimeout(function() {
     document.getElementById("result").innerHTML = "";
     document.getElementById("submitBtn").style.display="block";

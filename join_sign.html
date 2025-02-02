@@ -86,86 +86,92 @@
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
   <!-- JavaScript -->
   <script>
-    // 1. SignaturePad 초기화 및 캔버스 사이즈 보정
-    var canvas = document.getElementById("signaturePad");
-    var signaturePad = new SignaturePad(canvas);
+// 1. SignaturePad 초기화 및 캔버스 사이즈 보정
+var canvas = document.getElementById("signaturePad");
+var signaturePad = new SignaturePad(canvas);
 
-    function resizeCanvas() {
-      var ratio = Math.max(window.devicePixelRatio || 1, 1);
-      canvas.width = canvas.offsetWidth * ratio;
-      canvas.height = canvas.offsetHeight * ratio;
-      canvas.getContext("2d").scale(ratio, ratio);
-      signaturePad.clear(); // clear 후 isEmpty()가 제대로 동작하도록
-    }
-    window.onresize = resizeCanvas;
-    resizeCanvas();
+function resizeCanvas() {
+  var ratio = Math.max(window.devicePixelRatio || 1, 1);
+  canvas.width = canvas.offsetWidth * ratio;
+  canvas.height = canvas.offsetHeight * ratio;
+  canvas.getContext("2d").scale(ratio, ratio);
+  signaturePad.clear(); // clear 후 isEmpty()가 제대로 동작하도록
+}
+window.onresize = resizeCanvas;
+resizeCanvas();
 
-    // 서명 지우기 버튼 클릭 시
-    document.getElementById("clearSignature").addEventListener("click", function() {
-      signaturePad.clear();
-    });
+// 서명 지우기 버튼 클릭 시
+document.getElementById("clearSignature").addEventListener("click", function() {
+  signaturePad.clear();
+});
 
-    // 2. 폼 제출 이벤트 처리
-    document.getElementById("attendeeForm").addEventListener("submit", function(e) {
-      e.preventDefault();  // 페이지 새로고침 방지
-    
-      // 입력값 가져오기
-      var employeeId = document.getElementById("employeeId").value;
-      var name = document.getElementById("name").value;
-      var contact = document.getElementById("contact").value;
-      var signatureData = signaturePad.isEmpty() ? "" : signaturePad.toDataURL();  // 데이터 URL 형식
-      
-      // 확인 메시지 구성
-      var confirmMessage = "다음 내용으로 제출하시겠습니까?\n\n" +
-                           "사번: " + employeeId + "\n" +
-                           "성명: " + name + "\n" +
-                           "연락처: " + contact + "\n" +
-                           (signatureData ? "서명: 첨부됨" : "서명: 없음");
-      
-      if (!confirm(confirmMessage)) {
-        return;
-      }
-      
-      // 제출 버튼 비활성화 및 텍스트 변경
-      var submitButton = document.querySelector('button[type="submit"]');
-      submitButton.disabled = true;
-      submitButton.textContent = "📤제출중...잠시만 기다려 주세요";
-      
-      alert("🤷‍♂️제출중입니다. 잠시만 기다려 주세요");
-      
-      // 전송할 데이터 객체 (키는 한글로 사용)
-      var data = {
-        사번: employeeId,
-        이름: name,
-        연락처: contact,
-        서명: signatureData
-      };
-      
-      // Google Apps Script 웹 앱 URL (정확한 URL 사용)
-      var scriptURL = "https://script.google.com/macros/s/AKfycbwH2VL2C0x2nWP6Kqv3j1CuRCEPrt4aMQ8i7RtfGEhGYNZcWSB54zi7jZ3lhMAivfkt/exec";
-      
-      fetch(scriptURL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(data)
-      })
-      .then(() => {
-        document.getElementById("result").innerHTML =
-          '<div class="alert alert-success">🚀성공적으로 제출 되었습니다.</div>';
-        document.getElementById("attendeeForm").reset();
-        signaturePad.clear();  // 서명 캔버스도 초기화
-      })
-      .catch(error => {
-        console.error("Error!", error);
-        document.getElementById("result").innerHTML =
-          '<div class="alert alert-danger">⚠데이터 저장에 실패하였습니다.</div>';
-      })
-      .finally(() => {
-        submitButton.disabled = false;
-        submitButton.textContent = "📤제출하기";
-      });
-    });
+// 2. 폼 제출 이벤트 처리
+document.getElementById("attendeeForm").addEventListener("submit", function(e) {
+  e.preventDefault();  // 페이지 새로고침 방지
+
+  // **서명 필수 체크**
+  if (signaturePad.isEmpty()) {
+    alert("서명은 필수 입력값입니다. 서명을 작성해 주세요.");
+    return; // 서명이 없으면 제출 중단
+  }
+  
+  // 입력값 가져오기
+  var employeeId = document.getElementById("employeeId").value;
+  var name = document.getElementById("name").value;
+  var contact = document.getElementById("contact").value;
+  var signatureData = signaturePad.toDataURL();  // 서명이 존재하므로 바로 데이터 URL 추출
+
+  // 확인 메시지 구성
+  var confirmMessage = "다음 내용으로 제출하시겠습니까?\n\n" +
+                       "사번: " + employeeId + "\n" +
+                       "성명: " + name + "\n" +
+                       "연락처: " + contact + "\n" +
+                       "서명: 첨부됨";
+  
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+  
+  // 제출 버튼 비활성화 및 텍스트 변경
+  var submitButton = document.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  submitButton.textContent = "📤제출중...잠시만 기다려 주세요";
+  
+  alert("🤷‍♂️제출중입니다. 잠시만 기다려 주세요");
+  
+  // 전송할 데이터 객체 (키는 한글로 사용)
+  var data = {
+    사번: employeeId,
+    이름: name,
+    연락처: contact,
+    서명: signatureData
+  };
+  
+  // Google Apps Script 웹 앱 URL (정확한 URL 사용)
+  var scriptURL = "https://script.google.com/macros/s/AKfycbwH2VL2C0x2nWP6Kqv3j1CuRCEPrt4aMQ8i7RtfGEhGYNZcWSB54zi7jZ3lhMAivfkt/exec";
+  
+  fetch(scriptURL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(data)
+  })
+  .then(() => {
+    document.getElementById("result").innerHTML =
+      '<div class="alert alert-success">🚀성공적으로 제출 되었습니다.</div>';
+    document.getElementById("attendeeForm").reset();
+    signaturePad.clear();  // 서명 캔버스도 초기화
+  })
+  .catch(error => {
+    console.error("Error!", error);
+    document.getElementById("result").innerHTML =
+      '<div class="alert alert-danger">⚠데이터 저장에 실패하였습니다.</div>';
+  })
+  .finally(() => {
+    submitButton.disabled = false;
+    submitButton.textContent = "📤제출하기";
+  });
+});
   </script>
 </body>
 </html>

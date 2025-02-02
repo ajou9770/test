@@ -153,6 +153,10 @@ document.getElementById("attendeeForm").addEventListener("submit", function(e) {
       '<div class="alert alert-success">🚀성공적으로 제출 되었습니다.</div>';
     document.getElementById("attendeeForm").reset();
     signaturePad.clear();  // 서명 캔버스도 초기화
+    // 2초 후에 result 영역 숨기기
+    setTimeout(function() {
+    document.getElementById("result").innerHTML = "";
+  }, 2000);
   })
   .catch(error => {
     console.error("Error!", error);

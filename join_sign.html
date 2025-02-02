@@ -6,16 +6,22 @@
   <title>📝총회 참석자 명부제출</title>
   <!-- Bootstrap CSS (CDN) -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<style>
-  .input-group-text {
-    width: 90px;
-  }
-</style>
+  <style>
+    .input-group-text {
+      width: 90px;
+    }
+    /* 서명 캔버스 스타일 */
+    #signaturePad {
+      border: 1px solid #000;
+      width: 100%;
+      height: 150px;
+    }
+  </style>
 </head>
 <body>
   <div class="container mt-5">
     <h3 class="mb-4">📝총회 참석자 명부</h3>
-    <span>📢아래에 사번,성명,연락처를 입력 후 제출해 주세요</span>
+    <span>📢아래에 사번, 성명, 연락처, 서명을 입력 후 제출해 주세요</span>
     <br><br>
     <form id="attendeeForm">
       <!-- 사번 입력 그룹 -->
@@ -47,49 +53,78 @@
           <input type="tel" class="form-control" id="contact" name="contact" placeholder="숫자만" aria-label="연락처" aria-describedby="contactLabel" required>
         </div>
       </div>
+      
+      <!-- 서명 입력 그룹 -->
+      <div class="form-group">
+        <label for="signaturePad">✍서명</label>
+        <canvas id="signaturePad"></canvas>
+        <button type="button" id="clearSignature" class="btn btn-secondary btn-sm mt-2">서명 지우기</button>
+      </div>
     
       <!-- 제출 버튼 -->
-      <button type="submit" class="btn btn-primary btn-block" >📤제출하기</button>
+      <button type="submit" class="btn btn-primary btn-block">📤제출하기</button>
     </form>
     
     <div id="result" class="mt-3"></div>
   </div>
 
-  <!-- JavaScript: (필요 시 jQuery 또는 Bootstrap JS 추가) -->
+  <!-- Signature Pad 라이브러리 (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+  <!-- JavaScript -->
   <script>
+    // 1. SignaturePad 초기화 및 캔버스 사이즈 보정
+    var canvas = document.getElementById("signaturePad");
+    var signaturePad = new SignaturePad(canvas);
+
+    function resizeCanvas() {
+      var ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
+      signaturePad.clear(); // clear 후 isEmpty()가 제대로 동작하도록
+    }
+    window.onresize = resizeCanvas;
+    resizeCanvas();
+
+    // 서명 지우기 버튼 클릭 시
+    document.getElementById("clearSignature").addEventListener("click", function() {
+      signaturePad.clear();
+    });
+
+    // 2. 폼 제출 이벤트 처리
     document.getElementById("attendeeForm").addEventListener("submit", function(e) {
-      e.preventDefault();  // 폼 제출 시 페이지 새로고침 방지
+      e.preventDefault();  // 페이지 새로고침 방지
     
       // 입력값 가져오기
       var employeeId = document.getElementById("employeeId").value;
       var name = document.getElementById("name").value;
       var contact = document.getElementById("contact").value;
+      var signatureData = signaturePad.isEmpty() ? "" : signaturePad.toDataURL();  // 데이터 URL 형식
       
       // 확인 메시지 구성
       var confirmMessage = "다음 내용으로 제출하시겠습니까?\n\n" +
                            "사번: " + employeeId + "\n" +
                            "성명: " + name + "\n" +
-                           "연락처: " + contact;
+                           "연락처: " + contact + "\n" +
+                           (signatureData ? "서명: 첨부됨" : "서명: 없음");
       
-      // confirm 창을 통해 제출 여부 확인
       if (!confirm(confirmMessage)) {
-        // 사용자가 취소를 선택하면 제출을 중단함
         return;
       }
       
-      // 제출 버튼 요소 선택 (확인 후 비활성화 및 텍스트 변경)
+      // 제출 버튼 비활성화 및 텍스트 변경
       var submitButton = document.querySelector('button[type="submit"]');
       submitButton.disabled = true;
       submitButton.textContent = "📤제출중...잠시만 기다려 주세요";
       
-      // 제출 시작을 알리는 alert 표시
       alert("🤷‍♂️제출중입니다. 잠시만 기다려 주세요");
       
-      // Apps Script 서버에 보낼 데이터 객체 (키는 Apps Script 코드와 일치하도록 한글로 사용)
+      // 전송할 데이터 객체 (키는 한글로 사용)
       var data = {
         사번: employeeId,
         이름: name,
-        연락처: contact
+        연락처: contact,
+        서명: signatureData
       };
       
       // Google Apps Script 웹 앱 URL (정확한 URL 사용)
@@ -102,10 +137,10 @@
         body: JSON.stringify(data)
       })
       .then(() => {
-        // 응답 데이터를 읽을 수 없으므로 바로 성공 메시지 처리
         document.getElementById("result").innerHTML =
           '<div class="alert alert-success">🚀성공적으로 제출 되었습니다.</div>';
         document.getElementById("attendeeForm").reset();
+        signaturePad.clear();  // 서명 캔버스도 초기화
       })
       .catch(error => {
         console.error("Error!", error);
@@ -113,12 +148,10 @@
           '<div class="alert alert-danger">⚠데이터 저장에 실패하였습니다.</div>';
       })
       .finally(() => {
-        // 처리 완료 후 버튼 다시 활성화 및 텍스트 원복
         submitButton.disabled = false;
         submitButton.textContent = "📤제출하기";
       });
-    });    
-    </script>
-   
+    });
+  </script>
 </body>
 </html>
